@@ -177,6 +177,14 @@ class CloudProviderClient extends BaseCloudClient {
           })
           .promise()
           .then(retval => logger.info(`Deleted snapshot ${snapshotId}`, retval))
+          .then(() => this.blockstorage.describeSnapshots({
+              SnapshotIds: [snapshotId]
+            }).promise()
+            .catch(NotFound => {
+              logger.info(`Snapshot ${snapshotId} not found`, NotFound);
+            })
+          )
+          .then(retval => logger.info(`Snapshot details for ${snapshotId}`, retval))
           .catch(err => {
             logger.error(`Error occured while deleting snapshot ${snapshotId}`, err);
             throw err;
